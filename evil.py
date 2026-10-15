@@ -44,11 +44,32 @@ class VerificationView(discord.ui.View):
 
 @bot.event
 async def on_ready():
-    # تسجيل الأزرار لتظل تعمل حتى بعد إعادة تشغيل البوت
     bot.add_view(VerificationView())
     print(f"[+] Bot Online: {bot.user.name} | Ready for Evil Reversers")
 
-# أمر لإرسال لوحة التقييم في القناة
+# حدث انضمام عضو جديد لإرسال اللوحة تلقائياً
+@bot.event
+async def on_member_join(member):
+    try:
+        channel = discord.utils.get(member.guild.text_channels, name="general")
+        if channel:
+            embed = discord.Embed(
+                title="🔐 نظام تحديد الرتب | Evil Reversers",
+                description=(
+                    f"أهلاً بك {member.mention} في المقر الرئيسي! اختر رتبتك بناءً على مستواك وخبرتك بالتحديد:\n\n"
+                    "🔴 **🛡️ Blue Team & Reversers:**\n"
+                    "> إذا عندك خبرة وتقدر تعاونا بمشاريع حقيقية (يتطلب منك إثباتها للأدمن).\n\n"
+                    "🔵 **👤 Beginner & Member:**\n"
+                    "> إذا حاب تتعلم معانا من الصفر ونكون فريق واحد موحد."
+                ),
+                color=discord.Color.red()
+            )
+            embed.set_footer(text="Evil Reversers System • اختر بالضغط على الزر المناسب أسفله")
+            await channel.send(embed=embed, view=VerificationView())
+    except Exception as e:
+        print(f"Error in on_member_join: {e}")
+
+# أمر يدوي لإرسال اللوحة في أي وقت
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def setup_rules(ctx):
@@ -59,7 +80,7 @@ async def setup_rules(ctx):
             "🔴 **🛡️ Blue Team & Reversers:**\n"
             "> إذا عندك خبرة وتقدر تعاونا بمشاريع حقيقية (يتطلب منك إثباتها للأدمن).\n\n"
             "🔵 **👤 Beginner & Member:**\n"
-            "> إذا حاب تتعلم معانا من الصفر ونكون فريق واحد موحد."
+            "> إذا حاب تتعلم معنا من الصفر ونكون فريق واحد موحد."
         ),
         color=discord.Color.red()
     )
@@ -67,7 +88,6 @@ async def setup_rules(ctx):
     
     await ctx.send(embed=embed, view=VerificationView())
 
-# قراءة التوكن من متغيرة البيئة للتأمين
 TOKEN = os.getenv("DISCORD_TOKEN")
 if __name__ == "__main__":
     bot.run(TOKEN)
